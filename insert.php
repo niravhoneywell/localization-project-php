@@ -40,6 +40,14 @@ if(isset($_POST['StringKey']) and isset($_POST['English']))
 	// Connect to server and select database.
 	$connection = mysqli_connect("$host", "$username", "$password", "$db_name") or die("Connection failed."); 
 
+	/* change character set to utf8 */
+	if (!mysqli_set_charset($connection, "utf8")) {
+		printf("Error loading character set utf8: %s\n", mysqli_error($connection));
+		exit();
+	} else {
+		// printf("Current character set: %s\n", mysqli_character_set_name($connection));
+	}
+
 	// Get values from form
 	$StringKey=$_POST['StringKey'];
 	$English=$_POST['English'];
