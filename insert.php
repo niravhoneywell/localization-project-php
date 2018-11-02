@@ -1,15 +1,22 @@
 <html>
 <head>
-	<meta charset="utf-8" />
+	<meta charset="UTF-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>Insert key-value</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<script>
 		function showData(){
 			// let stringKey = document.forms[0].elements["StringKey"];
 			let stringKey = document.forms[0].StringKey;
 			let English = document.forms[0].English;
-			document.getElementById("iosData").innerHTML = "\"" + stringKey.value + "\" = \"" + English.value + "\";";
+			let escaped_english = replaceSpecials(English.value);
+			document.getElementById("iosData").innerHTML = "\"" + stringKey.value + "\" = \"" + escaped_english + "\";";
+			document.getElementById("escapedEnglish").value = escaped_english;
+		}
+
+		function replaceSpecials(English){
+			return English.replace(/\\\\/g, "\\").replace(/\\"/g, "\"").replace(/\\/g, "\\\\").replace(/\"/g, "\\\"").replace(/\\\\n/g, "\\n").replace(/'/g, "\\'");
 		}
 
 		function setCookie(cookieName, cookieValue) {
@@ -35,7 +42,52 @@
 				document.getElementById("SelectedCard").value = selectedCard;
 			}
 		});
+
+		function isNumberKey(event)
+       	{
+			// Allow numbers and decimal character 
+			var charCode = (event.which) ? event.which : event.keyCode;
+			if (charCode != 46 && (charCode < 48 || charCode > 57))
+				return false;
+
+			return true;
+       	}
+
+		function validateCharacterForKey(event) {
+			var charCode = (event.which) ? event.which : event.keyCode;
+
+			if((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122) ||
+				 (charCode >= 48 && charCode <= 57) || charCode === 95) {
+					return true;
+				}
+
+			return false;
+		}
+
+		function validateForm(){
+			let appversion = document.getElementById("appversion").value;
+			let stringKey = document.getElementById("StringKey").value;
+			let englishString = document.getElementById("English").value;
+			
+			if (!appversion.match(/^(\d+\.)(\d+\.)(\d)$/g)){
+				alert("Please enter valid App version, i.e. 4.2.0 or 4.4.1");
+				return false
+			}
+			
+			// alert(stringKey.match(/^(([a-zA-Z0-9])+[_]*)+$/g));
+
+			if (!stringKey.match(/^(([a-zA-Z0-9])+[_]*)+$/g)){
+				alert("Please enter valid String Key, i.e. dashboard_header_text");
+				return false
+			}
+
+			// alert(englishString.replace(/\\\\/g, "\\").replace(/\\"/g, "\"").replace(/\\/g, "\\\\").replace(/\"/g, "\\\""));
+			document.getElementById("escapedEnglish").value = replaceSpecials(englishString);
+			return true
+		}
+
 	</script>
+	<? include 'menu.php'; ?>
 </head>
 <body>
 <!-- Establish connection to DATABASE Server -->
@@ -46,10 +98,10 @@
 	$db_name="LocalizationProject"; // Database name 
 
 	header('Content-Type: text/html; charset=utf-8');
-
 	$StringKey = (isset($_POST['StringKey']) ? $_POST['StringKey'] : "");
 	$English = (isset($_POST['English']) ? $_POST['English'] : "");
-	
+	//echo $English."<br><br>";
+
 	// Connect to server and select database.
 	$connection = mysqli_connect("$host", "$username", "$password", "$db_name") or die("Connection failed."); 
 
@@ -63,7 +115,7 @@
 ?>
 
 <table border="0" cellspacing="1" cellpadding="3">
-	<form accept-charset="utf-8" name="form1" method="post" action="insert.php">
+	<form accept-charset="utf-8" name="form1" method="post" action="insert.php" onsubmit="return validateForm()">
 		<tr>
 			<td colspan="3"><strong>Insert Key-Value Into Localization Database</strong></td>
 		</tr>
@@ -78,13 +130,13 @@
 
 				if($search_result = mysqli_query($connection, $getAppVersion_query) and mysqli_num_rows($search_result) > 0) {
 					if($row = mysqli_fetch_assoc($search_result)) {
-						echo "<input name='appversion' value='".$row['appversion']."'>";
+						echo "<input name='appversion' id='appversion' required onkeypress='return isNumberKey(event)' value='".$row['appversion']."'>";
 					} else {
-						echo "<input name='appversion'>";
+						echo "<input name='appversion' id='appversion' required onkeypress='return isNumberKey(event)'>";
 					}
 				}
 			} else {
-				echo "<input name='appversion' value='".$_POST['appversion']."'>";	
+				echo "<input name='appversion' id='appversion' required onkeypress='return isNumberKey(event)' value='".$_POST['appversion']."'>";	
 			}
 		?>
 			</td>
@@ -110,11 +162,14 @@
 		</tr>
 		<tr>
 			<td width="100">String key:</td>
-			<td><input type="text" name="StringKey" id="StringKey" style="width: 350px;" value="<?php echo $StringKey ?>" onkeyup="showData()"></td>
+			<td><input type="text" name="StringKey" id="StringKey" required onkeypress="return validateCharacterForKey(event)" style="width: 350px;" value="<?php echo $StringKey ?>" onkeyup="showData()"></td>
 		</tr>
 		<tr>
 			<td>English value:</td>
-			<td><input style="width: 350px; height: 50px; word-break: break-word; alight:top;" name="English" id="English" value="<?php echo $English ?>" onkeyup="showData()"></td>
+			<td>
+				<input type="text" name="English" id="English" required style="width: 350px; height: 20px; word-break: break-word; alight:top;" value="<?php echo htmlspecialchars($English); ?>" onkeyup="showData()">
+				<input type="text" name="escapedEnglish" id="escapedEnglish">
+			</td>
 		</tr>
 		<tr>
 			<td colspan="2" id="iosData"></td>
@@ -124,7 +179,7 @@
 		</tr>
 <?php
 
-if(isset($_POST['appversion']) and isset($_POST['SelectedCard']) and isset($_POST['StringKey']) and isset($_POST['English']))
+if(isset($_POST['appversion']) and isset($_POST['SelectedCard']) and isset($_POST['StringKey']) and isset($_POST['English']) and isset($_POST['escapedEnglish']))
 {
 	// Connect to server and select database.
 	$connection = mysqli_connect("$host", "$username", "$password", "$db_name") or die("Connection failed."); 
@@ -141,8 +196,9 @@ if(isset($_POST['appversion']) and isset($_POST['SelectedCard']) and isset($_POS
 	$tbl_name = $_POST['SelectedCard']; // Table name 
 	$app_version = $_POST['appversion']; // App version for string
 	$StringKey=$_POST['StringKey'];
-	$English=$_POST['English'];
-	
+	$English=$_POST['escapedEnglish'];
+	// $English=$_POST['escapedEnglish'];
+
 	$StringKey_escaped = mysqli_real_escape_string($connection, $StringKey);
 	$English_escaped = mysqli_real_escape_string($connection, $English);
 
