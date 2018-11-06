@@ -3,10 +3,20 @@
 <?php
     if(isset($_GET["SelectedCard"])) {
         $selected_card = $_GET["SelectedCard"];
+    } else {
+        die("Could not get selected card name");
     }
 
     if(isset($_GET["SelectedLanguage"])) {
         $selected_language = $_GET["SelectedLanguage"];
+    } else {
+        die("Could not get selected language");
+    }
+
+    if(isset($_GET["LanguageCode"])) {
+        $language_code = $_GET["LanguageCode"];
+    } else {
+        die("Could not get selected language code");
     }
     
     // header("Content-type: application/octet-stream");
@@ -40,7 +50,7 @@
 
         if ($zip->open($tmp_file,  ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
             //Second argument is path where you want to put file inside zip when it unzip as folder
-            $zip->addFile($file_name, "/en.lproj/Localizable.strings");
+            $zip->addFile($file_name, "/".$language_code.".lproj/".$selected_card.".strings");
             $zip->close();
 
             // echo 'Archive created! filename='.$tmp_file;

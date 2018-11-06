@@ -6,10 +6,11 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <script>
-        function downloadLocalizableStrings(selected_card,selected_language) {
-            // alert("download_iOS_Localizable_String_file.php?SelectedCard="+selected_card+"&SelectedLanguage="+selected_language);
-            var win = window.open("download_iOS_Localizable_String_file.php?SelectedCard="+selected_card+"&SelectedLanguage="+selected_language, '_blank');
-            win.focus();
+        function downloadLocalizableStrings(selected_card,selected_language, language_code) {
+            string_url = "2_download_iOS_Localizable_String_file.php?SelectedCard="+selected_card+"&SelectedLanguage="+selected_language+"&LanguageCode="+language_code;
+            // alert(string_url);
+            var win = window.open(string_url, '_blank');
+            // win.focus();
             // alert("hello");
         }
     </script>
@@ -19,10 +20,16 @@
 
     if(isset($_POST["SelectedCard"])) {
         $selected_card = $_POST["SelectedCard"];
+    } else {
+        $selected_card = "";
     }
-    
+
     if(isset($_POST["SelectedLanguage"])) {
-        $selected_language = $_POST["SelectedLanguage"];
+        $selectLanguageArray = explode(" | ", $_POST["SelectedLanguage"]);
+        $selected_language = $selectLanguageArray[0];
+        $language_code = $selectLanguageArray[1];
+    } else {
+        $selected_language = "";
     }
 ?>
 </head>
@@ -54,11 +61,11 @@
         echo "<td><select name='SelectedLanguage' id='SelectedLanguage'>";
         while($row = mysqli_fetch_assoc($search_result))
         {
-            echo $row['language'];
+            // echo $row['language'];
             if ($selected_language == $row['language']) {
-                echo "<option selected>".$row['language']."</option>";
+                echo "<option selected>".$row['language']." | ".$row['languageCode']."</option>";
             } else {
-                echo "<option>".$row['language']."</option>";
+                echo "<option>".$row['language']." | ".$row['languageCode']."</option>";
             }
         }
         echo "</select></td>";
@@ -71,15 +78,15 @@
 </form>
 <?
     if(isset($_POST["SelectedCard"])){
-        echo "<td><a id='generateButton' name='generateButton' onclick='downloadLocalizableStrings(\"".$selected_card."\", \"".$selected_language."\")'>Download .strings File</button></td>";
+        echo "<td><a id='generateButton' name='generateButton' onclick='downloadLocalizableStrings(\"".$selected_card."\", \"".$selected_language."\", \"".$language_code."\")'>Download .strings File</button></td>";
     }
 ?>
 </table>
 
 <?php
     if(isset($_POST["Submit"]) && isset($_POST["SelectedCard"]) && isset($_POST["SelectedLanguage"])) {
-        $tbl_name = $_POST["SelectedCard"];
-        $column_name = $_POST["SelectedLanguage"];
+        $tbl_name = $selected_card;
+        $column_name = $selected_language;
         $search_query = "SELECT StringKeys, English, `$column_name` FROM $tbl_name WHERE `$column_name` != '' ";
         
         // echo $search_query;

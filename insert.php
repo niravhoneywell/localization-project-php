@@ -74,6 +74,8 @@
 				return false
 			}
 			
+			setCookie("savedAppVersion", appversion);
+
 			// alert(stringKey.match(/^(([a-zA-Z0-9])+[_]*)+$/g));
 
 			if (!stringKey.match(/^(([a-zA-Z0-9])+[_]*)+$/g)){
@@ -87,33 +89,15 @@
 		}
 
 	</script>
-	<? include 'menu.php'; ?>
+	<?
+		include 'menu.php';
+		include 'connection.php';
+
+		$StringKey = (isset($_POST['StringKey']) ? $_POST['StringKey'] : "");
+		$English = (isset($_POST['English']) ? $_POST['English'] : "");
+	?>
 </head>
 <body>
-<!-- Establish connection to DATABASE Server -->
-<?php
-	$host="localhost"; // Host name 
-	$username="root"; // Mysql username 
-	$password=""; // Mysql password 
-	$db_name="LocalizationProject"; // Database name 
-
-	header('Content-Type: text/html; charset=utf-8');
-	$StringKey = (isset($_POST['StringKey']) ? $_POST['StringKey'] : "");
-	$English = (isset($_POST['English']) ? $_POST['English'] : "");
-	//echo $English."<br><br>";
-
-	// Connect to server and select database.
-	$connection = mysqli_connect("$host", "$username", "$password", "$db_name") or die("Connection failed."); 
-
-	/* change character set to utf8 */
-	if (!mysqli_set_charset($connection, "utf8")) {
-		printf("Error loading character set utf8: %s\n", mysqli_error($connection));
-		exit();
-	} else {
-		// printf("Current character set: %s\n", mysqli_character_set_name($connection));
-	}
-?>
-
 <table border="0" cellspacing="1" cellpadding="3">
 	<form accept-charset="utf-8" name="form1" method="post" action="insert.php" onsubmit="return validateForm()">
 		<tr>
@@ -168,7 +152,7 @@
 			<td>English value:</td>
 			<td>
 				<input type="text" name="English" id="English" required style="width: 350px; height: 20px; word-break: break-word; alight:top;" value="<?php echo htmlspecialchars($English); ?>" onkeyup="showData()">
-				<input type="text" name="escapedEnglish" id="escapedEnglish">
+				<input type="hidden" name="escapedEnglish" id="escapedEnglish">
 			</td>
 		</tr>
 		<tr>

@@ -12,8 +12,7 @@
             if(self.validateForm()) {
                 $selected_card = document.getElementById("SelectedCard").value;
                 $app_version = document.getElementById("appversion").value;
-                // alert("download_Complete_Missing_Strings_Report.php?SelectedCard=" + $selected_card);
-                var win = window.open("download_Complete_Missing_Strings_Report.php?SelectedCard="+$selected_card+"&appversion="+$app_version, '_blank');
+                var win = window.open("3_download_Complete_Missing_Strings_Report.php?SelectedCard="+$selected_card+"&appversion="+$app_version, '_blank');
                 win.focus();
             }
         }
