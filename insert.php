@@ -188,9 +188,9 @@ if(isset($_POST['appversion']) and isset($_POST['SelectedCard']) and isset($_POS
 
 	//Search english string in database for duplication
 	if(isset($_POST["Submit"])) {
-		$search_query = "SELECT StringKeys, English FROM $tbl_name WHERE English like '$English_escaped' escape '\''";
-	} elseif(isset($_POST["forceSubmit"])) {
-		$search_query = "SELECT StringKeys, English FROM $tbl_name WHERE English like BINARY '$English_escaped' escape '\''";
+		$search_query = "SELECT * FROM $tbl_name WHERE English like '$English_escaped' escape '\''";
+	} elseif(isset($_POST["forceSubmit"])) { //Check for Exact match in DATABASE
+		$search_query = "SELECT * FROM $tbl_name WHERE English like BINARY '$English_escaped' escape '\''";
 	} else {
 		die("Form data invalidate. <a href='insert.php'>Back to main page</a>");
 	}
@@ -204,12 +204,23 @@ if(isset($_POST['appversion']) and isset($_POST['SelectedCard']) and isset($_POS
 
 		while($row = mysqli_fetch_assoc($search_result))
 		{
+			$keys_array = array_keys($row);
+			
+			$isTranslated = "<font color='#35b21e'>(Translations available)</font>";
+			
+			for($i=0; $i<count($keys_array); $i++) {
+				if($row[$keys_array[$i]] == "") {
+					$isTranslated = "<font color='red'>(Not Translated)</font>";
+				}
+			}
+
 			if($row['English'] == $English){
 				$exact_match_found = true;
-				$html_string = $html_string."<tr><td colspan=2><font color='#35b21e'><b>This is exact match</b></font></td></tr>";
+				$html_string = $html_string."<tr><td colspan=2><hr><font color='#35b21e'><b>This is exact match </font>$isTranslated</b></td></tr>";
 				$html_string = $html_string."<tr><td><font color='#35b21e'>StringKey</td><td>".$row['StringKeys']."</font></td></tr>";
 				$html_string = $html_string."<tr><td style='padding-bottom: 10px;'><font color='#35b21e'>English value</td><td>".$row['English']."</font></font></td></tr>";
 			} else {
+				$html_string = $html_string."<tr><td colspan=2><hr><b>$isTranslated</b></td></tr>";
 				$html_string = $html_string."<tr><td>StringKey</td><td>".$row['StringKeys']."</td></tr>";
 				$html_string = $html_string."<tr><td style='padding-bottom: 10px;'>English value</td><td>".$row['English']."</td></tr>";
 			}
