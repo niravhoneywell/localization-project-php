@@ -2,7 +2,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Insert key-value</title>
+	<title>Complete Missing String Report</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <script src="validations.js"></script>
@@ -50,20 +50,23 @@
     <table cellpadding=5>
         <tr>
             <td>Select Card</td>
+            <td>
                 <?php
                     $getCards_query = "SELECT * from CardsDetail";
 
                     if($search_result = mysqli_query($connection, $getCards_query) and mysqli_num_rows($search_result) > 0) {
-                        echo "<td><select name='SelectedCard' id='SelectedCard' onchange='setCookie(\"SelectedCard\", this.value)'>";
+                        echo "<select name='SelectedCard' id='SelectedCard' onchange='setCookie(\"SelectedCard\", this.value)'>";
                         while($row = mysqli_fetch_assoc($search_result))
                         {
                             echo "<option>".$row['tablename']."</option>";
                         }
-                        echo "</select></td></tr>";
+                        echo "</select>";
                     } else {
                         die("Can't fetch Cards Detail");
                     }
                 ?>
+            </td>
+        </tr>
     <tr>
         <td>App version for String</td>
         <td>
