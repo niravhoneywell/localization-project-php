@@ -189,17 +189,18 @@ if(isset($_POST['appversion']) and isset($_POST['SelectedCard']) and isset($_POS
 		{
 			$keys_array = array_keys($row);
 			
-			$isTranslated = "<font color='#35b21e'>(Translations available)</font>";
+			$string_app_version = $row['AppVersion'];
+			$isTranslated = "<font color='#35b21e'>[$string_app_version] - (Translations available) </font>";
 			
 			for($i=0; $i<count($keys_array); $i++) {
 				if($row[$keys_array[$i]] == "") {
-					$isTranslated = "<font color='red'>(Not Translated)</font>";
+					$isTranslated = "<font color='red'>[$string_app_version] - (Not Translated)</font>";
 				}
 			}
 
 			if($row['English'] == $English){
 				$exact_match_found = true;
-				$html_string = $html_string."<tr><td colspan=2><hr><font color='#35b21e'><b>This is exact match </font>$isTranslated</b></td></tr>";
+				$html_string = $html_string."<tr><td colspan=2><hr><font color='#35b21e'><b>This is exact match  - </font>$isTranslated</b></td></tr>";
 				$html_string = $html_string."<tr><td><font color='#35b21e'>StringKey</td><td>".$row['StringKeys']."</font></td></tr>";
 				$html_string = $html_string."<tr><td style='padding-bottom: 10px;'><font color='#35b21e'>English value</td><td>".$row['English']."</font></font></td></tr>";
 			} else {
